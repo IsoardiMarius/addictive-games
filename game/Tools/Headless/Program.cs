@@ -20,9 +20,10 @@ public static class Program
             case "shots": return Shots(args[1], args.Length > 2 ? int.Parse(args[2]) : 0, args.Length > 3 ? uint.Parse(args[3]) : 1u, args.Length > 4 ? args[4] : "");
             case "tour": return Tour(args[1]);
             case "test": return Tests.RunAll();
+            case "video": return Video.Make(args[1]);
             case "sheet": return Sheet(args[1], args.Length > 2 ? float.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture) : 3f);
             default:
-                Console.WriteLine("Commandes : test | balance [parcours] [occasionnel|habile] [v] | tour <dossier> | shots <dossier> [couche] [graine] [niveaux] | sheet <png> [échelle] | fonts <dossier-ttf> <png>");
+                Console.WriteLine("Commandes : test | video <sortie.mp4> | balance [parcours] [occasionnel|habile] [v] | tour <dossier> | shots <dossier> [couche] [graine] [niveaux] | sheet <png> [échelle] | fonts <dossier-ttf> <png>");
                 return 1;
         }
     }

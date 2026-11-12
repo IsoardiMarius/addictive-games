@@ -61,7 +61,7 @@ Recommandation [HYPOTHÈSE] : téléphone du porteur pour (a), APK direct pour (
 
 ## 6. Déroulé d'une séance observée
 
-Avant chaque testeur : jeu remis à zéro, grille imprimée, chronomètre.
+Avant chaque testeur : données de l'application effacées, ou jeu réinstallé (la « remise à zéro » des réglages garde le journal et ne rejoue pas l'initiation [DÉPÔT]) ; grille imprimée, chronomètre.
 
 | Minute | Étape | L'observateur |
 |---|---|---|
@@ -141,8 +141,8 @@ Le journal ne contient aucun identifiant [DÉPÔT], mais le message qui le porte
 
 ## 10. Analyse
 
-1. Séances : reporter les grilles le jour même ; classer les problèmes par nombre de testeurs touchés, puis par gravité.
-2. Campagne : lancer `outils/agreger_journaux.py`, remplir le tableau vide de `03` (§5), expliquer chaque taux par les réponses libres ; lire à part les proches et les téléphones lents.
+1. Séances : classer les problèmes par nombre de testeurs touchés, puis par gravité, le jour même.
+2. Campagne : lancer `outils/agreger_journaux.py` avec `--exclure-session-releve`, remplir le tableau vide de `03` (§5), expliquer chaque taux par les réponses libres ; lire à part les proches et les téléphones lents.
 3. Ne pas toucher aux seuils après avoir vu les résultats.
 
 ## 11. Critères de décision [HYPOTHÈSE]

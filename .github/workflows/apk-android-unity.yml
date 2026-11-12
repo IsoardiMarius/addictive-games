@@ -1,0 +1,44 @@
+# MODÈLE NON TESTÉ : ce flux n'a jamais été exécuté. Il décrit comment produire l'APK Android de test
+# sur GitHub avec Unity (action communautaire GameCI), sans installer Unity sur votre machine.
+#
+# Avant de l'utiliser :
+#   1. Activez une licence Unity Personal sur un ordinateur (Unity Hub), puis suivez la documentation
+#      de GameCI (https://game.ci/docs/github/activation) pour créer les secrets du dépôt :
+#      UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD. Ne les écrivez jamais dans un fichier du dépôt.
+#   2. Vérifiez la version d'Unity ci-dessous et les versions des actions.
+#   3. Lancez-le à la main : onglet Actions > « APK Android de test » > Run workflow.
+# Chaque exécution consomme des minutes GitHub Actions (comptez 15 à 30 minutes).
+name: APK Android de test (Unity, non testé)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: game/Library
+          key: unity-library-android-${{ hashFiles('game/Assets/**', 'game/Packages/**', 'game/ProjectSettings/**') }}
+          restore-keys: unity-library-android-
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: game
+          targetPlatform: Android
+          unityVersion: 6000.0.23f1
+          buildMethod: Game.EditorTools.ProjectSetup.BuildAndroid
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DigForReal-apk-test
+          path: game/Builds/*.apk
+          if-no-files-found: error

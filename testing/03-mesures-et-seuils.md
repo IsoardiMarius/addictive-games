@@ -36,7 +36,7 @@
 - 180 secondes [HYPOTHÈSE] : deux à quatre descentes.
 - Portails malus : au hasard, environ 15 %, un malus figurant dans 3 paires sur 10 [CALCUL, cahier des charges §5.3].
 
-**À confirmer dans le code du jeu** : ce qui ouvre une « session » et un « jour joué » (la copie du journal ?) ; le sens exact de `tentatives_par_couche` ; la valeur écrite sans amélioration achetée ; l'effet de la remise à zéro ; l'écriture des décimales sur un téléphone réglé en français.
+**À confirmer dans le code du jeu** avant la campagne : cinq points listés dans `outils/README.md`, dont ce qui ouvre une « session » et un « jour joué ».
 
 ## 3. Seuils proposés — tous [HYPOTHÈSE]
 
@@ -62,7 +62,7 @@ Fixés avant tout test, sans référence de marché vérifiée : les repères de
 - **Règle de décision** (`01`, §11) : les deux mesures principales décident ; les autres désignent quoi corriger.
 - Taux de victoire : déduit de la cible de conception, deux à quatre descentes par couche [DÉPÔT].
 - Pubs simulées : un plafond, une pub simulée ne coûtant pas 30 secondes d'attention. Un taux bas est instructif, un taux haut ne prouve rien.
-- Fluidité : sous 30 images par seconde, lire ce testeur à part.
+- Sous 30 images par seconde, lire le testeur à part.
 
 ## 4. Mise en garde statistique
 

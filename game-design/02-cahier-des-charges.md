@@ -10,7 +10,7 @@
 |---|---|
 | Plateformes | iOS et Android (application native, moteur Unity) |
 | Orientation | Portrait, une main, un doigt |
-| Durée d'une partie | 40 secondes à 2 minutes |
+| Durée d'une partie | 30 secondes à 1 minute 30 |
 | Public | Joueurs occasionnels, 12 ans et plus ; aucun contenu violent ni sensible |
 | Modèle | Gratuit ; pubs récompensées au choix du joueur et achats intégrés (aucun SDK dans le prototype) |
 | Connexion | Aucune : ni compte, ni serveur, ni base de données ; sauvegarde locale |
@@ -40,7 +40,7 @@ FORER (une descente) ──► VENTE du minerai ──► GARAGE (améliorations
 
 ### 4.1 Une descente
 
-- L'engin détruit les blocs qu'il touche. Plus un bloc est dur, plus il résiste : la terre se traverse comme du beurre, la roche ralentit, le socle est indestructible et se contourne.
+- L'engin détruit les blocs qu'il touche. Plus un bloc est dur, plus il résiste : la terre se traverse comme du beurre, la roche ralentit, le socle est presque indestructible et se contourne.
 - **Batterie** : seule ressource à surveiller. Elle se vide avec le temps ; les cristaux la rechargent ; la lave et les rochers l'entament. À zéro, la descente s'arrête.
 - **Minerai** : les filons libèrent des pépites, aspirées par l'aimant de l'engin.
 - **Portails** : des paires de portails barrent le passage. On choisit l'un des deux en se plaçant à gauche ou à droite ; l'engin se transforme pour le reste de la descente.
@@ -74,9 +74,9 @@ Chaque couche est un niveau : une profondeur à atteindre, un sceau à percer, u
 
 | N° | Couche | Nouveauté | Minerai |
 |---|---|---|---|
-| 1 | Terre | Diriger, creuser, portails | Charbon |
+| 1 | Terre | Diriger, creuser, portails | Ambre |
 | 2 | Argile | Cristaux de batterie | Cuivre |
-| 3 | Roche | TNT et réactions en chaîne | Fer |
+| 3 | Roche | TNT et réactions en chaîne | Jade |
 | 4 | Cavernes | Chutes libres, rochers qui tombent | Argent |
 | 5 | Filons | Roche dure, veines riches | Or |
 | 6 | Cristaux | Forêts de cristaux, descentes rapides | Émeraude |
@@ -87,7 +87,7 @@ Chaque couche est un niveau : une profondeur à atteindre, un sceau à percer, u
 | 11 | Noyau | Plaques de métal, tous les dangers réunis | Iridium |
 | 12 | Le Cœur | Le sceau final | Étoile |
 
-Après le Cœur : écran de fin, puis mode **Abysse** (descente sans fin, record de profondeur).
+Après le Cœur : écran de fin. Le mode **Abysse** (descente sans fin, record de profondeur) est prévu pour la suite.
 
 **Génération.** Chaque couche est produite par code à partir de quelques paramètres (longueur, dureté, proportions de matériaux, fréquence des dangers). Aucun niveau n'est dessiné à la main : ajouter une couche revient à ajouter une ligne de paramètres.
 
@@ -96,7 +96,7 @@ Après le Cœur : écran de fin, puis mode **Abysse** (descente sans fin, record
 | Élément | Comportement |
 |---|---|
 | Tendre, moyen, dur | Trois duretés par couche, aux couleurs de la couche |
-| Socle | Indestructible ; oblige à choisir sa route |
+| Socle | Quasi indestructible : il vaut mieux le contourner. Il laisse toujours au moins sept colonnes libres |
 | Filon | Libère des pépites |
 | Cristal | Recharge la batterie |
 | TNT | Explose quand on le touche, détruit autour de lui, déclenche les TNT voisins. Ne blesse pas l'engin : c'est un allié |
@@ -113,7 +113,7 @@ Après le Cœur : écran de fin, puis mode **Abysse** (descente sans fin, record
 | +1 foret (jusqu'à 7) | −1 foret |
 | Puissance +50 % | Puissance −30 % |
 | Vitesse +25 % | Énergie −5 s |
-| Énergie +8 s | |
+| Énergie +5 s | |
 | Aimant ×2 | |
 | Butin ×2 | |
 
@@ -126,14 +126,14 @@ Après le Cœur : écran de fin, puis mode **Abysse** (descente sans fin, record
 - **Court terme** : battre le sceau qui a résisté.
 - **Moyen terme** : améliorer l'engin, découvrir la couche suivante et son nouveau danger.
 - **Long terme** : atteindre le Cœur, puis le record de l'Abysse.
-- **Défi du jour** (débloqué après la couche 2) : même terrain pour tout le monde, engin imposé. Aucun serveur : le terrain est tiré de la date. Le score se partage par capture d'écran.
+- **Défi du jour** (prévu, non inclus dans le prototype) : même terrain pour tout le monde, engin imposé. Aucun serveur : le terrain est tiré de la date. Le score se partage par capture d'écran.
 
 **Ce que le jeu ne fait pas, par principe** : pas de vies ni d'énergie qui bloquent la partie, pas de compte à rebours artificiel, pas de série quotidienne dont la rupture serait punie, pas de coffre aléatoire payant, pas de « presque gagné » truqué, aucune pub forcée.
 
 ## 7. Difficulté
 
 - La dureté des blocs et la résistance du sceau augmentent d'une couche à l'autre ; la puissance de l'engin suit les améliorations.
-- La couche 1 est gagnable au premier essai. À partir de la couche 3, il faut en moyenne deux à quatre descentes et quelques améliorations pour passer.
+- La couche 1 est gagnable au premier essai. D'après le robot de test, les couches suivantes demandent entre une et six descentes, et finir le jeu en demande une trentaine (voir `testing/05-resultats-disponibles.md`). Ces chiffres restent à confirmer avec de vrais joueurs.
 - L'équilibrage est contrôlé par un robot joueur qui simule des centaines de descentes (voir `testing/`).
 
 ## 8. Monétisation prévue (hors prototype)
@@ -176,6 +176,6 @@ Dans le prototype, les deux pubs récompensées sont **simulées et étiquetées
 
 ## 12. Périmètre du prototype
 
-**Inclus** : menu, boucle complète, 12 couches, portails, TNT, rochers, lave, cristaux, coffres, sceaux, garage à six améliorations, victoire et défaite, sauvegarde locale, sons de synthèse, vibrations, français et anglais, journal de test, pubs récompensées simulées.
+**Inclus** : menu, boucle complète, 12 couches, portails, TNT, rochers, lave, cristaux, coffres, sceaux, garage à six améliorations, victoire et défaite, relance après une panne, sauvegarde locale, sons et musique de synthèse, vibrations (Android), français et anglais, journal de test, pubs récompensées simulées.
 
-**Reporté** (voir `ROADMAP.md`) : Abysse et défi du jour s'ils ne tiennent pas dans le premier jet, collection de reliques, missions, habillages, SDK de pubs et d'achats, classements.
+**Reporté** (voir `ROADMAP.md`) : Abysse, défi du jour, collection de reliques, missions, habillages, vibrations sur iOS, SDK de pubs et d'achats, classements.

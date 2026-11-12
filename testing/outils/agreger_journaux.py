@@ -4,12 +4,13 @@
 Agrège les « journaux de test » du jeu Dig For Real (format DFR-JOURNAL 1).
 
 Utilisation :
-    python3 agreger_journaux.py DOSSIER [--csv FICHIER.csv] [--date-releve AAAA-MM-JJ]
+    python3 agreger_journaux.py DOSSIER [--csv FICHIER.csv] [--exclure-session-releve]
 
-    DOSSIER         dossier contenant un journal par fichier .txt
-    --csv           fichier CSV à écrire (par défaut : DOSSIER/resultats.csv)
-    --date-releve   date à laquelle les journaux ont été copiés, pour les
-                    fichiers dont le nom ne se termine pas par _AAAA-MM-JJ
+    DOSSIER                    dossier contenant un journal par fichier .txt
+    --csv                      fichier CSV à écrire (par défaut : DOSSIER/resultats.csv)
+    --exclure-session-releve   ne compte pas la dernière session de chaque journal,
+                               celle que le testeur a ouverte pour copier son journal
+                               (à utiliser pour la campagne à distance)
 
 Nom de fichier conseillé : CODE_AAAA-MM-JJ.txt, par exemple T07_2026-12-13.txt
 (code du testeur, puis date de réception du journal). Le code n'est jamais un
@@ -33,6 +34,14 @@ from pathlib import Path
 
 # --- Réglages -----------------------------------------------------------------
 
+# Ce que le format DFR-JOURNAL 1 implique, d'après le code du jeu au 12 novembre 2026
+# (game/Assets/Game/Core/Game/GameApp.cs et Progress.cs) :
+#   - ouvrir le jeu, même pour copier le journal, ajoute le jour courant à jours_joues :
+#     le dernier jour de la liste est le jour de la copie, jamais compté comme un retour ;
+#   - cette ouverture ajoute aussi une session (voir --exclure-session-releve) ;
+#   - meilleure_couche est le nombre de couches franchies, de 0 à 12 ;
+#   - un délai de -1 signale un événement qui n'a pas eu lieu ; ips_moyennes=0.0, aucune mesure.
+# Si le jeu change l'un de ces points, il doit aussi changer le numéro de format.
 VERSION_FORMAT = "1"
 TAILLE_MAX_OCTETS = 200_000   # un journal pèse moins de 1 Ko
 NB_COUCHES = 12
@@ -88,8 +97,8 @@ def vers_entier(valeur):
 
 
 def vers_decimal(valeur, negatif_permis=False):
-    # La virgule décimale est tolérée (« 2,4 »), au cas où un téléphone réglé
-    # en français l'écrirait ainsi.
+    # Le jeu écrit un point décimal ; la virgule est tolérée (« 2,4 ») au cas où
+    # un journal aurait été retapé à la main.
     if not RE_DECIMAL.match(valeur):
         raise ValueError(valeur)
     nombre = float(valeur.replace(",", "."))
@@ -99,7 +108,7 @@ def vers_decimal(valeur, negatif_permis=False):
 
 
 def vers_delai(valeur):
-    """Valeur vide ou négative : l'événement n'a pas eu lieu (convention supposée)."""
+    """Valeur négative (le jeu écrit -1) ou vide : l'événement n'a pas eu lieu."""
     if valeur == "":
         return None
     nombre = vers_decimal(valeur, negatif_permis=True)
@@ -223,17 +232,23 @@ def verifier_coherence(c):
         if len(durees) > limite:
             alertes.append("durees_sessions_s contient %d durées, %d attendues au plus"
                            % (len(durees), limite))
+    # descentes_terminees compte les abandons dans le code du jeu, pas dans l'exemple
+    # de format : les deux lectures sont admises.
     terminees, commencees = c.get("descentes_terminees"), c.get("descentes_commencees")
     victoires, pannes, abandons = c.get("victoires"), c.get("pannes"), c.get("abandons")
-    if None not in (victoires, pannes, terminees) and victoires + pannes != terminees:
-        alertes.append("victoires + pannes diffère de descentes_terminees")
-    if None not in (terminees, abandons, commencees) and terminees + abandons > commencees:
-        alertes.append("plus de descentes terminées ou abandonnées que de descentes commencées")
+    if None not in (victoires, pannes, abandons, terminees):
+        if terminees not in (victoires + pannes, victoires + pannes + abandons):
+            alertes.append("descentes_terminees ne vaut ni victoires + pannes, "
+                           "ni victoires + pannes + abandons")
+    if None not in (terminees, commencees) and terminees > commencees:
+        alertes.append("plus de descentes terminées que commencées")
+    if None not in (victoires, pannes, abandons, commencees) and victoires + pannes + abandons > commencees:
+        alertes.append("plus de victoires, pannes et abandons que de descentes commencées")
     proposees, acceptees = c.get("pubs_simulees_proposees"), c.get("pubs_simulees_acceptees")
     if None not in (proposees, acceptees) and acceptees > proposees:
         alertes.append("plus de pubs simulées acceptées que proposées")
     couche = c.get("meilleure_couche")
-    if couche is not None and not 1 <= couche <= NB_COUCHES:
+    if couche is not None and couche > NB_COUCHES:
         alertes.append("meilleure_couche inattendue : %d" % couche)
     tentatives = c.get("tentatives_par_couche")
     if tentatives is not None and len(tentatives) != NB_COUCHES:
@@ -262,46 +277,40 @@ def taux(numerateur, denominateur):
     return numerateur / denominateur
 
 
-def oui_non(condition):
-    return None if condition is None else ("oui" if condition else "non")
-
-
-def mesurer(code, date_releve, c):
+def mesurer(code, c, exclure_session_releve=False):
     """Calcule les mesures d'un testeur à partir des champs lus dans son journal."""
     alertes = []
     premier = c.get("premier_lancement")
-    jours_connus = premier is not None and "jours_joues" in c
     jours = set(c.get("jours_joues") or [])
-    dernier_jour = max(jours) if jours else None
-    if date_releve and dernier_jour and date_releve < dernier_jour:
-        alertes.append("date de relevé antérieure au dernier jour joué")
-    reperes = [d for d in (date_releve, dernier_jour) if d is not None]
-    observe_jusqu_a = max(reperes) if reperes else None
+    jours_connus = premier is not None and bool(jours)
+    # Ouvrir le jeu pour copier le journal ajoute ce jour à jours_joues : le dernier
+    # jour de la liste est donc celui de la copie. On ne sait pas si le testeur a
+    # joué ce jour-là : il ne compte jamais comme un retour.
+    jour_copie = max(jours) if jours else None
 
     def retour(n):
-        """« oui », « non », ou « ? » si le journal a été relevé avant la fin de J+n."""
+        """« oui », « non », ou « ? » si le journal a été copié à J+n ou avant."""
         if not jours_connus:
             return "?"
         cible = premier + timedelta(days=n)
-        if cible in jours:
-            return "oui"
-        if observe_jusqu_a is not None and observe_jusqu_a > cible:
-            return "non"
+        if cible < jour_copie:
+            return "oui" if cible in jours else "non"
+        if cible == jour_copie:
+            alertes.append("journal copié à J+%d : le retour à J+%d est indéterminé" % (n, n))
         return "?"
 
     retour_j1, retour_j7 = retour(1), retour(7)
-    semaine_observee = retour_j7 != "?"
+    semaine_observee = jours_connus and jour_copie > premier + timedelta(days=7)
     jours_semaine = None
-    if jours_connus and semaine_observee:
+    if semaine_observee:
         jours_semaine = sum(1 for d in jours if premier <= d <= premier + timedelta(days=7))
 
-    # Décrochage précoce : moins de SEUIL_DECROCHAGE_S de jeu en tout et aucun
-    # jour joué de J+1 à J+7. Ne dépend pas du nombre de sessions, que la
-    # simple ouverture du jeu pour copier le journal peut augmenter.
+    # Décrochage précoce : moins de SEUIL_DECROCHAGE_S de jeu en tout et aucun jour
+    # joué de J+1 à J+7 (jour de la copie exclu). Ne dépend pas du nombre de sessions.
     duree_totale = c.get("duree_totale_s")
     decrochage = None
     if duree_totale is not None and jours_connus:
-        revenu = any(premier < d <= premier + timedelta(days=7) for d in jours)
+        revenu = any(premier < d <= premier + timedelta(days=7) and d != jour_copie for d in jours)
         if duree_totale >= SEUIL_DECROCHAGE_S or revenu:
             decrochage = "non"
         else:
@@ -309,12 +318,21 @@ def mesurer(code, date_releve, c):
 
     durees = c.get("durees_sessions_s")
     sessions = c.get("sessions")
+    if exclure_session_releve:  # la dernière session est celle de la copie du journal
+        if durees:
+            durees = durees[:-1]
+        if sessions:
+            sessions -= 1
+
     commencees = c.get("descentes_commencees")
+    victoires, pannes = c.get("victoires"), c.get("pannes")
+    # Descentes menées à leur terme, par une victoire ou par une panne (abandons exclus).
+    jugees = None if None in (victoires, pannes) else victoires + pannes
     achats = c.get("ameliorations_achetees")
     ips = c.get("ips_moyennes") or None  # 0 = aucune mesure de fluidité
     bonus, malus = c.get("portails_bonus"), c.get("portails_malus")
-    proposees, acceptees = c.get("pubs_simulees_proposees"), c.get("pubs_simulees_acceptees")
     total_portails = None if None in (bonus, malus) else bonus + malus
+    proposees, acceptees = c.get("pubs_simulees_proposees"), c.get("pubs_simulees_acceptees")
     # « A accepté au moins une pub simulée » n'a de sens que si une pub a été proposée.
     a_accepte_pub = None
     if acceptees:
@@ -324,7 +342,7 @@ def mesurer(code, date_releve, c):
 
     return {
         "testeur": code,
-        "date_releve": date_releve,
+        "jour_copie": jour_copie,
         "version_jeu": c.get("version_jeu"),
         "premier_lancement": premier,
         "retour_j1": retour_j1,
@@ -334,17 +352,17 @@ def mesurer(code, date_releve, c):
         "duree_totale_s": duree_totale,
         "duree_mediane_session_s": statistics.median(durees) if durees else None,
         "descentes_commencees": commencees,
-        "descentes_terminees": c.get("descentes_terminees"),
-        "victoires": c.get("victoires"),
+        "descentes_jugees": jugees,
+        "victoires": victoires,
         "abandons": c.get("abandons"),
         "descentes_par_session": (commencees / sessions
                                   if commencees is not None and sessions else None),
-        "taux_victoire": taux(c.get("victoires"), c.get("descentes_terminees")),
+        "taux_victoire": taux(victoires, jugees),
         "taux_abandon_descente": taux(c.get("abandons"), commencees),
         "meilleure_couche": c.get("meilleure_couche"),
         "tentatives_par_couche": c.get("tentatives_par_couche"),
         "ameliorations_achetees": achats,
-        "a_achete_amelioration": oui_non(None if achats is None else achats >= 1),
+        "a_achete_amelioration": None if achats is None else ("oui" if achats >= 1 else "non"),
         "delai_premier_contact_s": c.get("delai_premier_contact_s"),
         "delai_premiere_amelioration_s": c.get("delai_premiere_amelioration_s"),
         "portails_malus": malus,
@@ -441,7 +459,7 @@ def ligne_proportion(libelle, valeurs):
 def texte_regroupe(testeurs, cle_numerateur, cle_denominateur, est_un_taux=True):
     numerateur, denominateur = regrouper(testeurs, cle_numerateur, cle_denominateur, borne=est_un_taux)
     if denominateur == 0:
-        return ""
+        return "regroupé : n/d"
     rapport = numerateur / denominateur
     return "regroupé : %d/%d = %s" % (
         numerateur, denominateur, pct(rapport) if est_un_taux else nb(rapport))
@@ -449,7 +467,7 @@ def texte_regroupe(testeurs, cle_numerateur, cle_denominateur, est_un_taux=True)
 
 def afficher_par_testeur(testeurs):
     lignes = [["Testeur", "J+1", "J+7", "Jours", "Sess.", "Méd. sess.", "Desc./sess.",
-               "Victoires", "Abandons", "Couche", "Amél.", "Pubs simulées"]]
+               "Victoires", "Abandons", "Couches", "Amél.", "Pubs simulées"]]
     for t in testeurs:
         pubs = pct(t["taux_acceptation_pubs"])
         if t["taux_acceptation_pubs"] is not None:
@@ -462,11 +480,12 @@ def afficher_par_testeur(testeurs):
             t["a_achete_amelioration"] or "n/d", pubs])
     print("PAR TESTEUR")
     print(tableau(lignes))
-    print("  Légende : J+1, J+7 = a rejoué ce jour-là (« ? » = journal relevé trop tôt, ou date de relevé")
-    print("  inconnue) ; Jours = jours joués de J0 à J+7 ; Sess. = sessions ; Méd. sess. = durée médiane")
-    print("  d'une session ; Desc./sess. = descentes par session ; Victoires = victoires / descentes")
-    print("  terminées ; Abandons = descentes quittées en cours / descentes commencées ;")
-    print("  Couche = meilleure couche ; Amél. = a acheté une amélioration ; n/d = non disponible.")
+    print("  Légende : J+1, J+7 = a rejoué ce jour-là (« ? » = journal copié ce jour-là ou avant) ;")
+    print("  Jours = jours joués de J0 à J+7 ; Sess. = sessions ; Méd. sess. = durée médiane d'une")
+    print("  session ; Desc./sess. = descentes par session ; Victoires = victoires / (victoires +")
+    print("  pannes) ; Abandons = descentes quittées en cours / descentes commencées ;")
+    print("  Couches = couches franchies (meilleure_couche) ; Amél. = a acheté une amélioration ;")
+    print("  n/d = non disponible.")
 
 
 def afficher_global(testeurs):
@@ -479,6 +498,9 @@ def afficher_global(testeurs):
     acheteurs = sum(1 for v in colonne("delai_premiere_amelioration_s") if v is not None)
     ips = [v for v in colonne("ips_moyennes") if v is not None]
     lents = sum(1 for v in ips if v < SEUIL_IPS_BAS)
+    # Sans mode sans fin, un testeur qui a franchi les 12 couches n'a plus rien à jouer.
+    jeu_fini = [None if v is None else ("oui" if v >= NB_COUCHES else "non")
+                for v in colonne("meilleure_couche")]
 
     lignes = [
         ligne_proportion("Retour à J+1", colonne("retour_j1")),
@@ -490,7 +512,7 @@ def afficher_global(testeurs):
         ["Descentes par session, médiane des testeurs", nb(mediane(colonne("descentes_par_session"))),
          texte_regroupe(testeurs, "descentes_commencees", "sessions", est_un_taux=False)],
         ["Taux de victoire, médiane des testeurs", pct(mediane(colonne("taux_victoire"))),
-         texte_regroupe(testeurs, "victoires", "descentes_terminees")],
+         texte_regroupe(testeurs, "victoires", "descentes_jugees")],
         ["Descentes abandonnées, médiane des testeurs", pct(mediane(colonne("taux_abandon_descente"))),
          texte_regroupe(testeurs, "abandons", "descentes_commencees")],
         ligne_proportion("Décrochage précoce (moins de %d s de jeu, aucun retour)" % SEUIL_DECROCHAGE_S,
@@ -501,14 +523,14 @@ def afficher_global(testeurs):
          "%d testeur(s) concerné(s)" % acheteurs],
         ["Délai avant le premier toucher, médiane",
          avec_unite(mediane(colonne("delai_premier_contact_s")), "s"), ""],
-        ["Meilleure couche, médiane", nb(mediane(colonne("meilleure_couche"))), ""],
+        ["Couches franchies (meilleure_couche), médiane", nb(mediane(colonne("meilleure_couche"))), ""],
+        ligne_proportion("Testeurs ayant franchi les %d couches (jeu fini)" % NB_COUCHES, jeu_fini),
         ["Pubs simulées acceptées, médiane des testeurs", pct(mediane(colonne("taux_acceptation_pubs"))),
          texte_regroupe(testeurs, "pubs_simulees_acceptees", "pubs_simulees_proposees")],
         ligne_proportion("Testeurs ayant accepté au moins une pub simulée", colonne("a_accepte_pub")),
         ["Portails malus choisis, médiane des testeurs", pct(mediane(colonne("part_portails_malus"))),
          "%s ; au hasard : environ %s" % (
-             texte_regroupe(testeurs, "portails_malus", "portails_total") or "regroupé : n/d",
-             pct(PART_MALUS_AU_HASARD))],
+             texte_regroupe(testeurs, "portails_malus", "portails_total"), pct(PART_MALUS_AU_HASARD))],
         ["Images par seconde, minimum", nb(min(ips)) if ips else "n/d",
          "%d testeur(s) sous %d" % (lents, SEUIL_IPS_BAS) if ips else ""],
     ]
@@ -519,19 +541,20 @@ def afficher_global(testeurs):
 
 def afficher_couches(testeurs):
     """Répartition de meilleure_couche et essais par couche (testeurs ayant tenté la couche)."""
-    couches = [t["meilleure_couche"] for t in testeurs if t["meilleure_couche"] is not None]
+    franchies = [t["meilleure_couche"] for t in testeurs if t["meilleure_couche"] is not None]
     essais = [t["tentatives_par_couche"] for t in testeurs if t["tentatives_par_couche"]]
-    print("RÉPARTITION DE meilleure_couche ET TENTATIVES PAR COUCHE")
-    if not couches and not essais:
+    print("RÉPARTITION DE meilleure_couche (couches franchies) ET TENTATIVES PAR COUCHE")
+    if not franchies and not essais:
         print("  n/d")
         return
-    lignes = [["Couche", "Testeurs dont c'est la meilleure couche", "Testeurs l'ayant tentée",
-               "Tentatives : médiane (max.)"]]
-    for couche in sorted(set(range(1, NB_COUCHES + 1)) | set(couches)):
-        effectif = couches.count(couche)
-        tentees = [e[couche - 1] for e in essais if 0 < couche <= len(e) and e[couche - 1] > 0]
+    lignes = [["N", "Testeurs ayant franchi N couches", "Testeurs ayant tenté la couche N",
+               "Tentatives sur la couche N : médiane (max.)"]]
+    for n in sorted(set(range(0, NB_COUCHES + 1)) | set(franchies)):
+        effectif = franchies.count(n)
+        tentees = [e[n - 1] for e in essais if 0 < n <= len(e) and e[n - 1] > 0]
         lignes.append([
-            str(couche), ("%d  %s" % (effectif, "#" * effectif)).rstrip(), str(len(tentees)),
+            str(n), ("%d  %s" % (effectif, "#" * effectif)).rstrip(),
+            str(len(tentees)) if 1 <= n <= NB_COUCHES else "-",
             "%s (%s)" % (nb(statistics.median(tentees)), nb(max(tentees))) if tentees else "-"])
     print(tableau(lignes))
 
@@ -541,7 +564,7 @@ def afficher_couches(testeurs):
 # (nom de colonne, clé de la mesure, nature) ; nature : texte, nombre, pourcentage, ouinon
 COLONNES_CSV = [
     ("testeur", "testeur", "texte"),
-    ("date_releve", "date_releve", "texte"),
+    ("jour_copie", "jour_copie", "texte"),
     ("version_jeu", "version_jeu", "texte"),
     ("premier_lancement", "premier_lancement", "texte"),
     ("retour_j1", "retour_j1", "ouinon"),
@@ -608,7 +631,7 @@ def ecrire_csv(chemin, testeurs):
 
 # --- Programme principal ------------------------------------------------------
 
-def charger(dossier, date_par_defaut):
+def charger(dossier):
     """Lit tous les .txt du dossier.
 
     Retourne (fichiers trouvés, journaux retenus, fichiers écartés avec leur raison, alertes de lot).
@@ -628,8 +651,11 @@ def charger(dossier, date_par_defaut):
         except Exception as erreur:  # garde-fou : un fichier imprévu n'arrête jamais le lot
             ecartes.append((chemin.name, "erreur inattendue (%s)" % type(erreur).__name__))
             continue
-        code, date_releve = code_et_date(chemin)
-        lus.append({"fichier": chemin.name, "code": code, "date_releve": date_releve or date_par_defaut,
+        code, date_fichier = code_et_date(chemin)
+        jours = champs.get("jours_joues")
+        if date_fichier and jours and date_fichier < max(jours):
+            avertissements.append("la date du nom de fichier précède le dernier jour du journal")
+        lus.append({"fichier": chemin.name, "code": code, "date_fichier": date_fichier,
                     "champs": champs, "avertissements": avertissements})
 
     # Un testeur, un journal : le journal est cumulatif, on garde le plus récent.
@@ -638,8 +664,8 @@ def charger(dossier, date_par_defaut):
         par_code.setdefault(journal["code"], []).append(journal)
     retenus = []
     for code in sorted(par_code, key=str.lower):
-        candidats = sorted(par_code[code], key=lambda j: (j["date_releve"] or date.min,
-                                                          j["champs"].get("duree_totale_s") or 0))
+        candidats = sorted(par_code[code], key=lambda j: (j["champs"].get("duree_totale_s") or 0,
+                                                          j["date_fichier"] or date.min))
         retenus.append(candidats[-1])
         for ancien in candidats[:-1]:
             ecartes.append((ancien["fichier"], "journal plus ancien du testeur %s, remplacé par %s"
@@ -676,24 +702,17 @@ def main(arguments=None):
         description="Agrège les journaux de test de Dig For Real (format DFR-JOURNAL 1).")
     analyseur.add_argument("dossier", help="dossier contenant un journal par fichier .txt")
     analyseur.add_argument("--csv", help="fichier CSV à écrire (défaut : DOSSIER/resultats.csv)")
-    analyseur.add_argument("--date-releve", metavar="AAAA-MM-JJ",
-                           help="date de copie des journaux dont le nom ne porte pas de date")
+    analyseur.add_argument("--exclure-session-releve", action="store_true",
+                           help="ne pas compter la dernière session de chaque journal, "
+                                "ouverte pour copier le journal (campagne à distance)")
     options = analyseur.parse_args(arguments)
 
     dossier = Path(options.dossier)
     if not dossier.is_dir():
         print("Erreur : « %s » n'est pas un dossier." % dossier, file=sys.stderr)
         return 2
-    date_par_defaut = None
-    if options.date_releve:
-        try:
-            date_par_defaut = vers_date(options.date_releve)
-        except ValueError:
-            print("Erreur : --date-releve attend une date AAAA-MM-JJ.", file=sys.stderr)
-            return 2
-
     try:
-        fichiers, retenus, ecartes, alertes_lot = charger(dossier, date_par_defaut)
+        fichiers, retenus, ecartes, alertes_lot = charger(dossier)
     except OSError as erreur:
         print("Erreur : dossier illisible (%s)." % (erreur.strerror or erreur), file=sys.stderr)
         return 2
@@ -703,7 +722,7 @@ def main(arguments=None):
 
     testeurs = []
     for journal in retenus:
-        mesures = mesurer(journal["code"], journal["date_releve"], journal["champs"])
+        mesures = mesurer(journal["code"], journal["champs"], options.exclure_session_releve)
         mesures["alertes"] = journal["avertissements"] + mesures["alertes"]
         mesures["nb_avertissements"] = len(mesures["alertes"])
         testeurs.append(mesures)
@@ -713,6 +732,8 @@ def main(arguments=None):
     if any(RE_FICTIF.search(journal["fichier"]) for journal in retenus):
         print("*** DONNÉES FICTIVES (d'après les noms de fichiers) : "
               "ces chiffres ne décrivent aucun joueur réel. ***")
+    if options.exclure_session_releve:
+        print("Session de relevé exclue : la dernière session de chaque journal n'est pas comptée.")
     print()
 
     if ecartes:

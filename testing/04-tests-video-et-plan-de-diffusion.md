@@ -50,7 +50,7 @@ Relevé à 72 heures puis à 7 jours, par vidéo et par plateforme, dans un fich
 
 - Comparer les vidéos **entre elles, sur une même plateforme**. Sous 1 000 vues, une vidéo est « non concluante », pas « ratée » [HYPOTHÈSE].
 - Compter les commentaires sans recopier pseudonymes ni textes : aucune donnée personnelle conservée.
-- Repères de départ [HYPOTHÈSE, non sourcés, à recaler sur la médiane du compte après cinq vidéos] : rétention à 3 secondes de 60 % ; visionnage complet de 25 % ; 5 partages et 2 demandes du jeu pour 1 000 vues.
+- Repères de départ [HYPOTHÈSE, non sourcés, à recaler après cinq vidéos] : rétention à 3 secondes de 60 %, visionnage complet de 25 %, 5 partages et 2 demandes pour 1 000 vues.
 
 ## 5. Plan de diffusion sur six semaines
 

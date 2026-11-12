@@ -20,6 +20,8 @@ namespace Game.Unity
         private const MeshUpdateFlags Fast = MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices
                                              | MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontResetBoneBounds;
 
+        private static readonly Bounds Huge = new Bounds(Vector3.zero, new Vector3(1e6f, 1e6f, 1e6f));
+
         private readonly Mesh _mesh;
         private readonly Material _material;
         private readonly Texture2D _texture;
@@ -76,7 +78,7 @@ namespace Game.Unity
             }
             _mesh.SetIndexBufferParams(indices.Length, IndexFormat.UInt32);
             _mesh.SetIndexBufferData(indices, 0, 0, indices.Length, Fast);
-            _mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e6f, 1e6f, 1e6f));
+            _mesh.bounds = Huge;
         }
 
         public void Upload(DrawList list)
@@ -84,9 +86,17 @@ namespace Game.Unity
             int count = list.Count;
             if (count > _vertexCapacity) Grow(count);
             if (count > 0) _mesh.SetVertexBufferData(list.Verts, 0, 0, count, 0, Fast);
+            // Les bornes n'étant pas recalculées (gain de temps), la plage de sommets utilisée est indiquée explicitement.
+            var range = new SubMeshDescriptor(0, count / 4 * 6, MeshTopology.Triangles)
+            {
+                baseVertex = 0,
+                firstVertex = 0,
+                vertexCount = count,
+                bounds = Huge
+            };
             _mesh.subMeshCount = 1;
-            _mesh.SetSubMesh(0, new SubMeshDescriptor(0, count / 4 * 6, MeshTopology.Triangles), Fast);
-            _mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e6f, 1e6f, 1e6f));
+            _mesh.SetSubMesh(0, range, Fast);
+            _mesh.bounds = Huge;
         }
     }
 }

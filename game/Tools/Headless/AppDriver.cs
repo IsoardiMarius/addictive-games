@@ -29,6 +29,9 @@ public sealed class AppDriver
     public readonly GameApp App;
     public readonly MemoryPlatform Plat = new MemoryPlatform();
     public DateTime Now = new DateTime(2026, 11, 12, 10, 0, 0);
+    /// <summary>Appelé après chaque image (capture vidéo, mixage du son).</summary>
+    public Action<float> OnFrame;
+    public SoftRaster Fb { get { return _fb; } }
     public double CoreMs;
     public long Frames, Quads;
     public int MaxQuads;
@@ -57,6 +60,7 @@ public sealed class AppDriver
         _sw.Stop();
         CoreMs += _sw.Elapsed.TotalMilliseconds; Frames++;
         Quads += App.List.QuadCount; MaxQuads = Math.Max(MaxQuads, App.List.QuadCount);
+        if (OnFrame != null) OnFrame(dt);
         App.Audio.Shots.Clear();
     }
 

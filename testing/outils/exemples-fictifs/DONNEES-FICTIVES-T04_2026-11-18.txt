@@ -3,17 +3,17 @@ Bonjour, voici mon journal de test (exemple fictif) :
 DFR-JOURNAL 1
 version_jeu=0.1.0
 premier_lancement=2026-11-14
-jours_joues=2026-11-14;2026-11-15;2026-11-17
-sessions=5
-duree_totale_s=1127
-durees_sessions_s=260;185;342;120;220
+jours_joues=2026-11-14;2026-11-15;2026-11-17;2026-11-18
+sessions=6
+duree_totale_s=1142
+durees_sessions_s=260;185;342;120;220;15
 descentes_commencees=22
-descentes_terminees=21
+descentes_terminees=22
 victoires=6
 pannes=15
 abandons=1
 meilleure_couche=4
-tentatives_par_couche=1;3;4;5;0;0;0;0;0;0;0;0
+tentatives_par_couche=3;5;6;8;0;0;0;0;0;0;0;0
 delai_premier_contact_s=3,1
 delai_premiere_amelioration_s=118
 ameliorations_achetees=11

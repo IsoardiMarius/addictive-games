@@ -15,11 +15,11 @@ Cote : **2** = réussit seul, sans hésiter · **1** = réussit après plus de 5
 
 | Moment | À observer | Cote | Temps | Mots, gestes |
 |---|---|---|---|---|
-| Avant le premier toucher | Où va le regard ? Suit-il la main animée « Glisse pour diriger » ? | — | … s | |
+| Compréhension sans explication | Avant de toucher : où va le regard ? Suit-il la main animée « Glisse pour diriger » ? Pose-t-il une question ? | | … s | |
 | Premier toucher | Glisse, tape ou appuie longuement ? Dirige l'engin exprès, vers le minerai, en moins de 10 secondes ? | | … s | |
 | Premier portail | Se place exprès ? Prend le bonus ? Dit pourquoi ? | | … s | |
 | Première panne | Avait-il remarqué la batterie ? Réaction (rire, soupir, silence) ; dit pourquoi la descente s'arrête ; relance sans y être invité ? | | … s | |
-| Vente, garage | Comprend d'où viennent les pièces ; ouvre le garage seul ; achète une amélioration, laquelle ; voit l'engin changer ? | | … s | |
+| Première amélioration | Comprend d'où viennent les pièces ; ouvre le garage seul ; achète une amélioration, laquelle ; voit l'engin changer ? | | … s | |
 | Pub simulée | Remarque l'offre ; l'accepte ; réagit à l'étiquette « Pub simulée » ? | | | |
 
 - Si la panne ou la première amélioration survient après deux minutes, continuer et noter l'heure.
@@ -69,7 +69,7 @@ En tête du message : « Inutile de rejouer pour répondre. »
 | N° | Question | Réponse |
 |---|---|---|
 | 1 | Collez ici votre journal de test (Réglages → « Copier mon journal de test »). | Texte |
-| 2 | Sur les sept derniers jours, vous avez joué… Pour quelle raison principale ? | Plus que vous ne le pensiez · Autant · Moins · Plus du tout après le premier jour ; libre |
+| 2 | Sur les sept derniers jours, vous avez joué… Pour quelle raison principale ? | Davantage que prévu · Autant · Moins · Pas du tout après le premier jour ; libre |
 | 3 | Comment décririez-vous vos parties de la semaine ? | Même échelle de 1 à 5 |
 | 4 | Si le jeu disparaissait de votre téléphone aujourd'hui… | Il me manquerait beaucoup · Un peu · Pas du tout · Je n'y joue déjà plus |
 | 5 | Quand le jeu proposait une récompense contre une « pub simulée », vous avez… | Toujours refusé · Accepté quelquefois · Accepté souvent · Je n'ai pas vu d'offre |
@@ -84,7 +84,6 @@ Prix de la question 8 : fourchette de `launch/`, elle-même une hypothèse.
 
 - **Faire expliquer** plutôt que demander « avez-vous compris ? » : tout le monde répond oui.
 - **Aucun mot qui souffle la réponse** (« portail bonus », « batterie ») dans les questions de compréhension.
-- **Échelle symétrique**, extrémités nommées, point neutre ; la même aux trois dates.
-- **Le positif et le négatif** dans la même question ouverte ; **prix et publicité en dernier**.
+- **Échelle symétrique**, extrémités nommées, point neutre, la même aux trois dates ; **le positif et le négatif** dans la même question ouverte ; **prix et publicité en dernier**.
 - **Les actes avant les intentions** (« avez-vous ouvert », « avez-vous payé ») : une intention déclarée surestime.
 - **Propension à payer, vraies pubs** : déclarations à lire comme un plafond [HYPOTHÈSE], jamais comme une prévision de revenu. Le comportement pèse plus (question 7, journal).

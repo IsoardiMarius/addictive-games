@@ -110,6 +110,12 @@ public sealed class SoftRaster
         a = (tex[i00 + 3] * w00 + tex[i10 + 3] * w10 + tex[i01 + 3] * w01 + tex[i11 + 3] * w11) * k;
     }
 
+    /// <summary>Image courante en octets RVB (pour l'encodage vidéo).</summary>
+    public void CopyRgb24(byte[] dst)
+    {
+        for (int i = 0; i < W * H * 3; i++) dst[i] = (byte)Math.Clamp((int)(_fb[i] * 255f + 0.5f), 0, 255);
+    }
+
     public void SavePng(string path)
     {
         byte[] rgba = new byte[W * H * 4];
