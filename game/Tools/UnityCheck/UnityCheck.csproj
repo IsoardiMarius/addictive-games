@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Vérification de compilation de la couche Unity, hors Unity : les scripts sont compilés contre des
+       bibliothèques de référence d'Unity récupérées sur NuGet (paquet tiers UnityEngine.Modules, version 2021.3).
+       Cela valide les signatures d'API, pas le comportement : seul l'éditeur Unity fait foi. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);UNITY_ANDROID;ENABLE_LEGACY_INPUT_MANAGER;UNITY_2021_2_OR_NEWER;DFR_COMPILE_CHECK;$(ExtraDefines)</DefineConstants>
+    <NoWarn>$(NoWarn);CS0162;NU1701</NoWarn>
+  </PropertyGroup>
+  <!-- Variante « éditeur / iOS » : dotnet build -p:Variant=editor -->
+  <PropertyGroup Condition="'$(Variant)' == 'editor'">
+    <DefineConstants>ENABLE_LEGACY_INPUT_MANAGER;UNITY_EDITOR;UNITY_2021_2_OR_NEWER;DFR_COMPILE_CHECK</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Game/Unity/**/*.cs" />
+    <ProjectReference Include="../Core/Game.Core.csproj" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" IncludeAssets="compile" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

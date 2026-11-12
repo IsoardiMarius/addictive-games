@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Vérification de compilation des scripts d'éditeur (configuration et build), hors Unity, contre les
+       bibliothèques de référence du paquet NuGet tiers Unity3D.SDK (Unity 2021.1). La branche réservée à
+       Unity 2021.2 et plus récent (NamedBuildTarget) n'est pas couverte par cette vérification. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);UNITY_EDITOR</DefineConstants>
+    <NoWarn>$(NoWarn);NU1701;CS0618</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Editor/**/*.cs" />
+    <PackageReference Include="Unity3D.SDK" Version="2021.1.14.1" IncludeAssets="compile" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

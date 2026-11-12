@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Compile le cœur du jeu (C# pur, sans Unity) exactement comme Unity le fera :
+       .NET Standard 2.1 et C# 9. Sert au banc d'essai et aux tests hors Unity. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Game.Core</AssemblyName>
+    <RootNamespace>Game.Core</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Game/Core/**/*.cs" />
+  </ItemGroup>
+</Project>
