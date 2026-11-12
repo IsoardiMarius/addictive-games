@@ -120,10 +120,15 @@ namespace Game.Core.Engine
             if (w < bw * 2f) bw = w * 0.5f;
             if (h < bh * 2f) bh = h * 0.5f;
             float um = (s.U0 + s.U1) * 0.5f, vm = (s.V0 + s.V1) * 0.5f;
-            float[] xs = { x, x + bw, x + w - bw, x + w };
-            float[] ys = { y, y + bh, y + h - bh, y + h };
-            float[] us = { s.U0, um, um, s.U1 };
-            float[] vs = { s.V0, vm, vm, s.V1 };
+            // Tableaux sur la pile : aucune allocation mémoire par image.
+            Span<float> xs = stackalloc float[4];
+            Span<float> ys = stackalloc float[4];
+            Span<float> us = stackalloc float[4];
+            Span<float> vs = stackalloc float[4];
+            xs[0] = x; xs[1] = x + bw; xs[2] = x + w - bw; xs[3] = x + w;
+            ys[0] = y; ys[1] = y + bh; ys[2] = y + h - bh; ys[3] = y + h;
+            us[0] = s.U0; us[1] = um; us[2] = um; us[3] = s.U1;
+            vs[0] = s.V0; vs[1] = vm; vs[2] = vm; vs[3] = s.V1;
             for (int j = 0; j < 3; j++)
                 for (int i = 0; i < 3; i++)
                 {

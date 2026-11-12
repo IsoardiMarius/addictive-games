@@ -128,7 +128,7 @@ Le journal ne contient aucun identifiant [DÉPÔT], mais le message qui le porte
 
 ## 9. Calendrier indicatif
 
-[HYPOTHÈSE : build installable et décisions prises le 20 novembre 2026. Sinon décaler en bloc, hors des fêtes (19 décembre au 3 janvier).]
+[HYPOTHÈSE : build installable et décisions prises le 20 novembre 2026, alors que le jeu n'a pas encore tourné sur un téléphone [DÉPÔT, `05`]. Sinon décaler en bloc, hors des fêtes (19 décembre au 3 janvier).]
 
 | Dates | Étape |
 |---|---|
@@ -151,8 +151,8 @@ Seuils fixés avant les tests ; détail et incertitude dans `03`.
 
 | Décision | Séances observées | Campagne |
 |---|---|---|
-| **Continuer** | Aucun blocage commun à 2 testeurs ; 4 testeurs sur 5 achètent seuls une amélioration en moins de 3 minutes | Retour à J+1 de 60 % ou plus **et** à J+7 de 30 % ou plus ; aucune mesure secondaire au rouge |
+| **Continuer** | Aucun blocage commun à 2 testeurs ; 4 testeurs sur 5 achètent seuls une amélioration en moins de 3 minutes | Retour à J+1 de 60 % ou plus **et** retour à J+7 ou jeu fini de 30 % ou plus ; aucune mesure secondaire au rouge |
 | **Corriger, puis retester** | Un blocage commun à 2 testeurs : corriger, puis 2 ou 3 séances avec de nouveaux testeurs | Tout autre cas ; deux cycles au plus |
-| **Arrêter, ou changer de concept** | 4 testeurs sur 5 cessent de jouer avant la fin et notent leur plaisir à 2 sur 5 ou moins | Retour à J+1 sous 40 % **et** à J+7 sous 15 % **et** plaisir médian de 2 sur 5 ou moins ; ou échec après deux cycles |
+| **Arrêter, ou changer de concept** | 4 testeurs sur 5 cessent de jouer avant la fin et notent leur plaisir à 2 sur 5 ou moins | Retour à J+1 sous 40 % **et** retour à J+7 ou jeu fini sous 15 % **et** plaisir médian de 2 sur 5 ou moins ; ou échec après deux cycles |
 
 « Continuer » ouvre la préparation du test vidéo (`04`), lui-même soumis à accord.

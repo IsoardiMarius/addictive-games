@@ -193,6 +193,8 @@ public static class Tests
         Check(d.App.Screen == GameScreen.Results, "la descente doit se terminer sur l'écran de fin");
         Check(d.App.Run.Won, "la première descente doit être gagnée par un joueur occasionnel");
         Check(d.App.P.Coins > 0 && d.App.P.MaxLayer >= 1 && d.App.P.TutorialDone, "la victoire doit être enregistrée");
+        Check(d.App.P.J.RunsStarted == 1 && d.App.P.J.RunsEnded == 1 && d.App.P.J.Wins == 1 && d.App.P.J.Fails == 0 && d.App.P.J.Quits == 0,
+              "le journal doit compter une descente commencée, terminée et gagnée");
         d.Wait(2f);
         long before = d.App.P.Coins;
         Check(d.Tap(Loc.Get("res.double")), "bouton de vente doublée absent");
@@ -225,6 +227,19 @@ public static class Tests
 
     private static void Robustness()
     {
+        // L'atlas doit tenir à toutes les densités d'écran (de 1,5 à 3 pixels par point).
+        foreach (float scale in new[] { 1.5f, 1.85f, 2f, 2.1f, 2.11f, 2.25f, 2.5f, 2.77f, 3f, 4.2f })
+        {
+            try
+            {
+                var a = new AppDriver(null, "", 390, 844, 47f, 34f, scale);
+                a.Frame();
+                Check(a.App.Atlas.FillRatio < 0.92f, $"atlas presque plein à l'échelle {scale} : {a.App.Atlas.FillRatio:P0}");
+                Console.WriteLine($"         atlas à l'échelle {scale} : {a.App.Atlas.Width}×{a.App.Atlas.Height}, rempli à {a.App.Atlas.FillRatio:P0}");
+            }
+            catch (Exception e) { Check(false, $"échelle {scale} : {e.Message}"); }
+        }
+
         foreach (var (w, h) in new[] { (390, 844), (360, 640), (320, 480), (820, 1180), (1024, 768), (200, 900) })
         {
             var d = new AppDriver(null, "", w, h, 0f, 0f, 1.5f);

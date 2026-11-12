@@ -8,7 +8,7 @@ Le jeu n'a pas non plus été lancé dans Unity ni sur un téléphone (voir `gam
 
 ## 2. Tests automatiques
 
-Commande : `bash game/Tools/verifier.sh`. Résultat : **86 963 vérifications réussies, 0 échec.**
+Commande : `bash game/Tools/verifier.sh`. Résultat : **86 974 vérifications réussies, 0 échec.**
 
 | Famille de tests | Ce qui est vérifié |
 |---|---|

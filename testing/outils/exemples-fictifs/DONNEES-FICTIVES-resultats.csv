@@ -1,6 +1,6 @@
-﻿testeur;jour_copie;version_jeu;premier_lancement;retour_j1;retour_j7;jours_joues_j0_j7;sessions;duree_totale_s;duree_mediane_session_s;descentes_commencees;descentes_par_session;taux_victoire_pct;taux_abandon_descente_pct;meilleure_couche;a_achete_amelioration;ameliorations_achetees;delai_premier_contact_s;delai_premiere_amelioration_s;part_portails_malus_pct;pubs_simulees_proposees;pubs_simulees_acceptees;taux_acceptation_pubs_pct;a_accepte_pub_simulee;ips_moyennes;decrochage_precoce;nb_avertissements
-DONNEES-FICTIVES-T01;2026-11-21;0.1.0;2026-11-14;oui;?;;7;1834;300;41;5,86;23,1;4,9;6;oui;23;2,4;71;9,4;31;12;38,7;oui;59,2;non;1
-DONNEES-FICTIVES-T02;2026-11-22;0.1.0;2026-11-14;oui;oui;7;24;9210;384;163;6,79;25,9;3,1;10;oui;71;1,8;64;7;139;88;63,3;oui;60;non;0
-DONNEES-FICTIVES-T03;2026-11-23;0.1.0;2026-11-15;non;non;1;2;113;56,5;2;1;0;50;0;non;0;7,5;;40;1;0;0;non;31,4;oui;0
-DONNEES-FICTIVES-T04;2026-11-18;0.1.0;2026-11-14;oui;?;;6;1142;202,5;22;3,67;28,6;4,5;4;oui;11;3,1;118;13,2;;;;;;non;2
-GLOBAL;;;;3/4;1/2;4;6,5;1488;251,25;31,5;4,76;24,5;4,7;5;3/4;17;2,75;71;11,3;31;12;38,7;2/3;59,2;1/4;
+﻿testeur;jour_copie;version_jeu;premier_lancement;retour_j1;retour_j7;retour_j7_ou_jeu_fini;jours_joues_j0_j7;sessions;duree_totale_s;duree_mediane_session_s;descentes_commencees;descentes_par_session;taux_victoire_pct;taux_abandon_descente_pct;meilleure_couche;a_achete_amelioration;ameliorations_achetees;delai_premier_contact_s;delai_premiere_amelioration_s;part_portails_malus_pct;pubs_simulees_proposees;pubs_simulees_acceptees;taux_acceptation_pubs_pct;a_accepte_pub_simulee;ips_moyennes;decrochage_precoce;nb_avertissements
+DONNEES-FICTIVES-T01;2026-11-21;0.1.0;2026-11-14;oui;?;?;;7;1834;300;41;5,86;23,1;4,9;6;oui;23;2,4;71;9,4;31;12;38,7;oui;59,2;non;1
+DONNEES-FICTIVES-T02;2026-11-22;0.1.0;2026-11-14;oui;oui;oui;7;24;9210;384;163;6,79;25,9;3,1;10;oui;71;1,8;64;7;139;88;63,3;oui;60;non;0
+DONNEES-FICTIVES-T03;2026-11-23;0.1.0;2026-11-15;non;non;non;1;2;113;56,5;2;1;0;50;0;non;0;7,5;;40;1;0;0;non;31,4;oui;0
+DONNEES-FICTIVES-T04;2026-11-18;0.1.0;2026-11-14;oui;?;?;;6;1142;202,5;22;3,67;28,6;4,5;4;oui;11;3,1;118;13,2;;;;;;non;2
+GLOBAL;;;;3/4;1/2;1/2;4;6,5;1488;251,25;31,5;4,76;24,5;4,7;5;3/4;17;2,75;71;11,3;31;12;38,7;2/3;59,2;1/4;

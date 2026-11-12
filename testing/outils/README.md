@@ -14,7 +14,7 @@ python3 testing/outils/agreger_journaux.py DOSSIER [--csv FICHIER.csv] [--exclur
 | Argument | Rôle |
 |---|---|
 | `DOSSIER` | Dossier contenant les journaux. **Pour des journaux réels, un dossier hors du dépôt git.** |
-| `--csv` | CSV à écrire. Par défaut : `DOSSIER/resultats.csv` |
+| `--csv` | CSV à écrire. Par défaut : `DOSSIER/resultats.csv` ; pour des journaux fictifs, `DOSSIER/DONNEES-FICTIVES-resultats.csv` |
 | `--exclure-session-releve` | Ne compte pas la dernière session de chaque journal, celle que le testeur a ouverte pour copier son journal. **À utiliser pour la campagne à distance** ; à ne pas utiliser pour une séance observée, où le journal est copié pendant la partie. |
 
 Codes de sortie : `0` au moins un journal exploité · `1` aucun journal exploitable, ou CSV non écrit · `2` dossier ou option invalide.
@@ -28,7 +28,7 @@ Codes de sortie : `0` au moins un journal exploité · `1` aucun journal exploit
 
 ## Ce qui est calculé
 
-- **Par testeur** : retour à J+1 et à J+7 (d'après `premier_lancement` et `jours_joues`), jours joués de J0 à J+7, sessions, durée médiane de session, descentes par session, taux de victoire, descentes abandonnées, couches franchies, achat d'au moins une amélioration, taux d'acceptation des pubs simulées. Le CSV ajoute les délais, la part de portails malus, les images par seconde et le décrochage précoce.
+- **Par testeur** : retour à J+1 et à J+7 (d'après `premier_lancement` et `jours_joues`), « retour à J+7 ou jeu fini », jours joués de J0 à J+7, sessions, durée médiane de session, descentes par session, taux de victoire, descentes abandonnées, couches franchies, achat d'au moins une amélioration, taux d'acceptation des pubs simulées. Le CSV ajoute les délais, la part de portails malus, les images par seconde et le décrochage précoce.
 - **Au global** : chaque testeur compte une fois. Part des testeurs avec son intervalle de confiance à 95 % (méthode de Wilson), ou médiane des testeurs. Le total « regroupé » (tous les événements additionnés) est donné à titre indicatif.
 - **Répartition de `meilleure_couche`**, et nombre d'essais par couche pour repérer un mur de difficulté.
 - **CSV** : une ligne par testeur, puis une ligne `GLOBAL` (médiane des testeurs, ou « oui/réponses »). Format français : séparateur point-virgule, virgule décimale, UTF-8. Retirer la ligne `GLOBAL` avant de recalculer des moyennes dans un tableur.
@@ -41,13 +41,14 @@ Vérifié le 12 novembre 2026 dans `game/Assets/Game/Core/Game/` (`GameApp.cs`, 
 |---|---|
 | Ouvrir le jeu, même pour copier le journal, ajoute le jour courant à `jours_joues` | Le dernier jour de la liste est celui de la copie. Le script ne le compte jamais comme un retour : un journal copié à J+7 donne « ? » à J+7. D'où le relevé à J+8 |
 | Une session commence au lancement, ou au retour après plus de 5 minutes en arrière-plan | Ouvrir le jeu pour copier le journal ajoute une session courte : option `--exclure-session-releve` |
-| `meilleure_couche` est le nombre de couches franchies, de 0 à 12 | 0 est une valeur normale ; 12 signifie que le testeur a fini le jeu et n'a plus rien à jouer |
+| `meilleure_couche` est le nombre de couches franchies, de 0 à 12 | 0 est une valeur normale ; 12 signifie que le testeur a fini le jeu |
+| Le prototype n'a pas de mode sans fin, et un robot le finit en 32 descentes (`../05-resultats-disponibles.md`) | Un testeur assidu aura fini avant J+7 : la mesure « retour à J+7 ou jeu fini » compte « jeu fini » comme un retour |
 | `tentatives_par_couche` compte chaque descente commencée sur la couche | Sa somme vaut `descentes_commencees` |
 | Un délai de `-1` signale un événement qui n'a pas eu lieu ; `ips_moyennes=0.0`, aucune mesure ; point décimal | Lus comme « non disponible » ; la virgule décimale reste tolérée |
 | `duree_totale_s` est le temps d'ouverture du jeu, menus compris | Le décrochage précoce (moins de 180 s) se lit sur ce total |
 | La « remise à zéro » des réglages garde le journal et ne rejoue pas l'initiation | Avant une séance observée, effacer les données de l'application ou la réinstaller |
 
-**Écart à trancher.** Dans le code, `descentes_terminees` compte aussi les abandons (victoires + pannes + abandons). Dans l'exemple qui définit le format, elle vaut victoires + pannes. Le script accepte les deux et calcule le taux de victoire sur victoires + pannes, sans utiliser `descentes_terminees`.
+**Écart tranché le 12 novembre 2026.** Le jeu compte `descentes_terminees` = victoires + pannes, comme dans l'exemple qui définit le format ; les abandons sont comptés à part, et un test automatique le contrôle. Le script accepte aussi l'ancienne forme (victoires + pannes + abandons) et calcule le taux de victoire sur victoires + pannes.
 
 ## Fichiers mal formés
 
@@ -71,7 +72,7 @@ Contrôle fait le 12 novembre 2026 sur 17 fichiers d'essai volontairement abîm�
 Commande lancée depuis la racine du dépôt, le 12 novembre 2026, avec Python 3.13.18 :
 
 ```
-python3 testing/outils/agreger_journaux.py testing/outils/exemples-fictifs --csv testing/outils/exemples-fictifs/DONNEES-FICTIVES-resultats.csv
+python3 testing/outils/agreger_journaux.py testing/outils/exemples-fictifs
 ```
 
 Sortie obtenue (code de sortie 0) :
@@ -96,6 +97,7 @@ PAR TESTEUR
 GLOBAL (4 testeur(s) ; chaque testeur compte une fois)
   Retour à J+1                                              3/4 = 75 %  IC 95 % : 30 % à 95 %
   Retour à J+7                                              1/2 = 50 %  IC 95 % : 9 % à 91 % ; 2 indéterminé(s)
+  Retour à J+7 ou jeu fini (12 couches franchies)           1/2 = 50 %  IC 95 % : 9 % à 91 % ; 2 indéterminé(s)
   Jours joués de J0 à J+7, médiane                          4           sur 8 possibles
   Durée médiane de session, médiane des testeurs            251,2 s     de 56,5 à 384 s
   Descentes par session, médiane des testeurs               4,8         regroupé : 228/39 = 5,8
@@ -106,7 +108,7 @@ GLOBAL (4 testeur(s) ; chaque testeur compte une fois)
   Délai avant la première amélioration, médiane             71 s        3 testeur(s) concerné(s)
   Délai avant le premier toucher, médiane                   2,8 s
   Couches franchies (meilleure_couche), médiane             5
-  Testeurs ayant franchi les 12 couches (jeu fini)          0/4 = 0 %   IC 95 % : 0 % à 49 %
+  Testeurs ayant fini le jeu                                0/4 = 0 %   IC 95 % : 0 % à 49 %
   Pubs simulées acceptées, médiane des testeurs             39 %        regroupé : 100/171 = 58 %
   Testeurs ayant accepté au moins une pub simulée           2/3 = 67 %  IC 95 % : 21 % à 94 % ; 1 indéterminé(s)
   Portails malus choisis, médiane des testeurs              11 %        regroupé : 44/550 = 8 % ; au hasard : environ 15 %

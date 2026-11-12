@@ -37,7 +37,7 @@ public sealed class AppDriver
     public int MaxQuads;
 
     private readonly SoftRaster _fb;
-    private readonly float _px;      // pixels par point
+    private readonly float _px;      // pixels par point du jeu
     private readonly string _outDir;
     private float _fingerX = 195f, _fingerY = 600f;
     private bool _fingerDown;
@@ -46,11 +46,13 @@ public sealed class AppDriver
 
     public AppDriver(string outDir, string save = "", int wPt = 390, int hPt = 844, float safeTop = 47f, float safeBottom = 34f, float scale = 2f, string lang = "fr")
     {
-        _outDir = outDir; _px = scale;
+        _outDir = outDir;
         Plat.Data = save; Plat.Lang = lang;
         App = new GameApp(Plat, File.ReadAllBytes(Path.Combine(Program.RepoGame(), "Assets", "Game", "Resources", "Fonts", "GameFont.bytes")), scale, () => Now);
         App.Resize(wPt * scale, hPt * scale, safeTop * scale, safeBottom * scale);
-        if (outDir != null) _fb = new SoftRaster((int)(wPt * scale), (int)(hPt * scale), scale);
+        // Sur un écran large (tablette), la zone de jeu est centrée : un point du jeu ne vaut plus « scale » pixels.
+        _px = wPt * scale / App.ScreenW;
+        if (outDir != null) _fb = new SoftRaster((int)(wPt * scale), (int)(hPt * scale), _px);
     }
 
     public void Frame(float dt = 1f / 60f)

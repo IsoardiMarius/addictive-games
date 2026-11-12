@@ -68,8 +68,8 @@ En tête du message : « Inutile de rejouer pour répondre. »
 
 | N° | Question | Réponse |
 |---|---|---|
-| 1 | Collez ici votre journal de test (Réglages → « Copier mon journal de test »). | Texte |
-| 2 | Sur les sept derniers jours, vous avez joué… Pour quelle raison principale ? | Davantage que prévu · Autant · Moins · Pas du tout après le premier jour ; libre |
+| 1 | Ouvrez le jeu et, avant de jouer, copiez votre journal (Réglages → « Copier mon journal de test »). Collez-le ici. | Texte |
+| 2 | Sur les sept derniers jours, vous avez joué… Pour quelle raison principale ? | Davantage que prévu · Autant · Moins · Pas du tout après le premier jour · J'ai fini le jeu ; libre |
 | 3 | Comment décririez-vous vos parties de la semaine ? | Même échelle de 1 à 5 |
 | 4 | Si le jeu disparaissait de votre téléphone aujourd'hui… | Il me manquerait beaucoup · Un peu · Pas du tout · Je n'y joue déjà plus |
 | 5 | Quand le jeu proposait une récompense contre une « pub simulée », vous avez… | Toujours refusé · Accepté quelquefois · Accepté souvent · Je n'ai pas vu d'offre |

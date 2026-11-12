@@ -28,6 +28,10 @@ namespace Game.Core
         public float Trauma, Flash, HitStop, CoinPulse, EnergyPulse, BannerT = 99f;
         public uint FlashRgb = 0xFFFFFF;
         public string Banner = "", BannerSub = "";
+        /// <summary>Message bref ancré à l'écran (effet d'un portail) : il ne chevauche jamais les jauges.</summary>
+        public string Notice = "";
+        public uint NoticeRgb = 0xFFFFFF;
+        public float NoticeT = 99f;
         public bool ShakeOn = true;
 
         private Rng _r = new Rng(4242);
@@ -36,7 +40,7 @@ namespace Game.Core
 
         public void Clear()
         {
-            _n = 0; Texts.Clear(); Trauma = 0f; Flash = 0f; HitStop = 0f; BannerT = 99f; _combo = 0;
+            _n = 0; Texts.Clear(); Trauma = 0f; Flash = 0f; HitStop = 0f; BannerT = 99f; NoticeT = 99f; _combo = 0;
         }
 
         private void Add(byte kind, float x, float y, float vx, float vy, float life, float size, uint rgb,
@@ -91,7 +95,7 @@ namespace Game.Core
             Flash = MathF.Max(0f, Flash - dt * 3.2f);
             CoinPulse = MathF.Max(0f, CoinPulse - dt * 5f);
             EnergyPulse = MathF.Max(0f, EnergyPulse - dt * 4f);
-            BannerT += dt;
+            BannerT += dt; NoticeT += dt;
             _comboT -= dt; if (_comboT <= 0f) _combo = 0;
             _hapticT -= dt; _lavaT -= dt; _sparkT -= dt; _lowT -= dt;
         }
@@ -163,7 +167,7 @@ namespace Game.Core
                         GateFx fx = (GateFx)e.A;
                         bool good = Balance.IsBonus(fx);
                         uint rgb = good ? 0x4BD6FFu : 0xFF5A6Eu;
-                        Text(Loc.Get("gate." + fx), e.X, e.Y - 0.6f, rgb, 22f, 1.2f);
+                        Notice = Loc.Get("gate." + fx); NoticeRgb = rgb; NoticeT = 0f;
                         Add(5, e.X, e.Y, 0f, 0f, 0.45f, 30f, rgb, 0f, 0f, true, 260f);
                         Burst(e.X, e.Y, 14, rgb, 9f, 6, 7f, 0.7f, 3f, true);
                         Flash = 0.35f; FlashRgb = rgb;

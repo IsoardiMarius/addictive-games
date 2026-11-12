@@ -78,7 +78,7 @@ Unity se contente de les exécuter : un maillage dynamique, une texture, un shad
 | Vérification | Outil | Résultat au 12 novembre 2026 |
 |---|---|---|
 | Compilation du cœur comme dans Unity (C# 9, .NET Standard 2.1) | `Tools/Core` | Réussie |
-| Tests automatiques | `Tools/Headless test` | 86 963 vérifications, 0 échec |
+| Tests automatiques | `Tools/Headless test` | 86 974 vérifications, 0 échec |
 | Parcours complet de l'interface au doigt | `Tools/Headless tour` | Réussi, 33 captures |
 | Compilation de la couche Unity (variantes Android et éditeur / iOS) | `Tools/UnityCheck` | Réussie contre Unity 2021.3 |
 | Compilation des scripts d'éditeur | `Tools/EditorCheck` | Réussie contre Unity 2021.1, sauf trois lignes propres à Unity 2021.2 et plus récent |

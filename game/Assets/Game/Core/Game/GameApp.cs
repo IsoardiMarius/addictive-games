@@ -359,8 +359,9 @@ namespace Game.Core
             if (run.Finished) P.Finished = true;
             P.TutorialDone = true;
             Journal j = P.J;
-            j.RunsEnded++;
-            if (_quit) j.Quits++; else if (_won) j.Wins++; else j.Fails++;
+            // Une descente « terminée » s'achève par une victoire ou une panne ; les abandons sont comptés à part.
+            if (_quit) j.Quits++;
+            else { j.RunsEnded++; if (_won) j.Wins++; else j.Fails++; }
             j.GatesGood += run.GatesGood; j.GatesBad += run.GatesBad;
             if (P.MaxLayer > j.BestLayer) j.BestLayer = P.MaxLayer;
             Save();

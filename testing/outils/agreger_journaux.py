@@ -7,7 +7,8 @@ Utilisation :
     python3 agreger_journaux.py DOSSIER [--csv FICHIER.csv] [--exclure-session-releve]
 
     DOSSIER                    dossier contenant un journal par fichier .txt
-    --csv                      fichier CSV à écrire (par défaut : DOSSIER/resultats.csv)
+    --csv                      fichier CSV à écrire (par défaut : DOSSIER/resultats.csv,
+                               ou DOSSIER/DONNEES-FICTIVES-resultats.csv pour des journaux fictifs)
     --exclure-session-releve   ne compte pas la dernière session de chaque journal,
                                celle que le testeur a ouverte pour copier son journal
                                (à utiliser pour la campagne à distance)
@@ -232,7 +233,7 @@ def verifier_coherence(c):
         if len(durees) > limite:
             alertes.append("durees_sessions_s contient %d durées, %d attendues au plus"
                            % (len(durees), limite))
-    # descentes_terminees compte les abandons dans le code du jeu, pas dans l'exemple
+    # descentes_terminees = victoires + pannes ; une ancienne version du jeu y ajoutait les abandons
     # de format : les deux lectures sont admises.
     terminees, commencees = c.get("descentes_terminees"), c.get("descentes_commencees")
     victoires, pannes, abandons = c.get("victoires"), c.get("pannes"), c.get("abandons")
@@ -301,6 +302,16 @@ def mesurer(code, c, exclure_session_releve=False):
 
     retour_j1, retour_j7 = retour(1), retour(7)
     semaine_observee = jours_connus and jour_copie > premier + timedelta(days=7)
+    # Le prototype n'a pas de mode sans fin : qui a franchi les 12 couches n'a plus rien
+    # à jouer. « Jeu fini » compte donc comme un retour dans la mesure composite.
+    couche = c.get("meilleure_couche")
+    jeu_fini = None if couche is None else ("oui" if couche >= NB_COUCHES else "non")
+    if retour_j7 == "oui" or jeu_fini == "oui":
+        retour_j7_ou_fini = "oui"
+    elif retour_j7 == "non" and jeu_fini == "non":
+        retour_j7_ou_fini = "non"
+    else:
+        retour_j7_ou_fini = "?"
     jours_semaine = None
     if semaine_observee:
         jours_semaine = sum(1 for d in jours if premier <= d <= premier + timedelta(days=7))
@@ -347,6 +358,8 @@ def mesurer(code, c, exclure_session_releve=False):
         "premier_lancement": premier,
         "retour_j1": retour_j1,
         "retour_j7": retour_j7,
+        "retour_j7_ou_jeu_fini": retour_j7_ou_fini,
+        "jeu_fini": jeu_fini,
         "jours_joues_j0_j7": jours_semaine,
         "sessions": sessions,
         "duree_totale_s": duree_totale,
@@ -359,7 +372,7 @@ def mesurer(code, c, exclure_session_releve=False):
                                   if commencees is not None and sessions else None),
         "taux_victoire": taux(victoires, jugees),
         "taux_abandon_descente": taux(c.get("abandons"), commencees),
-        "meilleure_couche": c.get("meilleure_couche"),
+        "meilleure_couche": couche,
         "tentatives_par_couche": c.get("tentatives_par_couche"),
         "ameliorations_achetees": achats,
         "a_achete_amelioration": None if achats is None else ("oui" if achats >= 1 else "non"),
@@ -498,13 +511,12 @@ def afficher_global(testeurs):
     acheteurs = sum(1 for v in colonne("delai_premiere_amelioration_s") if v is not None)
     ips = [v for v in colonne("ips_moyennes") if v is not None]
     lents = sum(1 for v in ips if v < SEUIL_IPS_BAS)
-    # Sans mode sans fin, un testeur qui a franchi les 12 couches n'a plus rien à jouer.
-    jeu_fini = [None if v is None else ("oui" if v >= NB_COUCHES else "non")
-                for v in colonne("meilleure_couche")]
 
     lignes = [
         ligne_proportion("Retour à J+1", colonne("retour_j1")),
         ligne_proportion("Retour à J+7", colonne("retour_j7")),
+        ligne_proportion("Retour à J+7 ou jeu fini (%d couches franchies)" % NB_COUCHES,
+                         colonne("retour_j7_ou_jeu_fini")),
         ["Jours joués de J0 à J+7, médiane", nb(mediane(colonne("jours_joues_j0_j7"))),
          "sur 8 possibles"],
         ["Durée médiane de session, médiane des testeurs",
@@ -524,7 +536,7 @@ def afficher_global(testeurs):
         ["Délai avant le premier toucher, médiane",
          avec_unite(mediane(colonne("delai_premier_contact_s")), "s"), ""],
         ["Couches franchies (meilleure_couche), médiane", nb(mediane(colonne("meilleure_couche"))), ""],
-        ligne_proportion("Testeurs ayant franchi les %d couches (jeu fini)" % NB_COUCHES, jeu_fini),
+        ligne_proportion("Testeurs ayant fini le jeu", colonne("jeu_fini")),
         ["Pubs simulées acceptées, médiane des testeurs", pct(mediane(colonne("taux_acceptation_pubs"))),
          texte_regroupe(testeurs, "pubs_simulees_acceptees", "pubs_simulees_proposees")],
         ligne_proportion("Testeurs ayant accepté au moins une pub simulée", colonne("a_accepte_pub")),
@@ -569,6 +581,7 @@ COLONNES_CSV = [
     ("premier_lancement", "premier_lancement", "texte"),
     ("retour_j1", "retour_j1", "ouinon"),
     ("retour_j7", "retour_j7", "ouinon"),
+    ("retour_j7_ou_jeu_fini", "retour_j7_ou_jeu_fini", "ouinon"),
     ("jours_joues_j0_j7", "jours_joues_j0_j7", "nombre"),
     ("sessions", "sessions", "nombre"),
     ("duree_totale_s", "duree_totale_s", "nombre"),
@@ -729,7 +742,8 @@ def main(arguments=None):
 
     print("JOURNAUX DE TEST - %d fichier(s) .txt lu(s) dans %s : %d retenu(s), %d écarté(s)"
           % (len(fichiers), dossier, len(testeurs), len(ecartes)))
-    if any(RE_FICTIF.search(journal["fichier"]) for journal in retenus):
+    fictif = any(RE_FICTIF.search(journal["fichier"]) for journal in retenus)
+    if fictif:
         print("*** DONNÉES FICTIVES (d'après les noms de fichiers) : "
               "ces chiffres ne décrivent aucun joueur réel. ***")
     if options.exclure_session_releve:
@@ -767,7 +781,10 @@ def main(arguments=None):
           % len(testeurs))
     print("fiables. Lire les intervalles (IC 95 %) et testing/03-mesures-et-seuils.md, section 4.")
 
-    chemin_csv = Path(options.csv) if options.csv else dossier / "resultats.csv"
+    if options.csv:
+        chemin_csv = Path(options.csv)
+    else:  # un résultat tiré de journaux fictifs porte toujours la mention dans son nom
+        chemin_csv = dossier / ("DONNEES-FICTIVES-resultats.csv" if fictif else "resultats.csv")
     try:
         ecrire_csv(chemin_csv, testeurs)
     except OSError as erreur:

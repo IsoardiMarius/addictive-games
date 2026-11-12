@@ -20,7 +20,7 @@ Publier une vidéo est une publication publique : rien ne part sans son accord, 
 
 - Il dit quelle **accroche** retient l'œil et fait réagir, sans dépense.
 - **Le nombre de vues ne prouve pas la rentabilité.** La chaîne complète est : vue, envie, installation, retour, revenu. Seul le premier maillon est mesuré ici : il n'existe ni fiche store ni lien.
-- Rappels du dépôt : une publicité est retenue pour son taux de clic, pas pour la rétention (`ads-catalog/`) ; Dan Lespect déclarait 300 000 vues sur YouTube, autant sur TikTok, et environ 8 000 $ le premier mois ; sa suite plafonne à 10 000+ installations (`research/`).
+- Rappels du dépôt : une publicité est retenue pour son taux de clic, pas pour la rétention (`ads-catalog/`) ; Dan Lespect déclarait 300 000 vues sur YouTube et autant sur TikTok pour environ 8 000 $ le premier mois ; sa suite plafonne à 10 000+ installations (`research/`).
 - Une vidéo isolée est une anecdote : sur un compte neuf, la diffusion est très aléatoire [HYPOTHÈSE].
 
 ## 3. Cinq vidéos de gameplay réel
@@ -68,8 +68,7 @@ Relevé à 72 heures puis à 7 jours, par vidéo et par plateforme, dans un fich
 
 | Commentaire | Réponse type |
 |---|---|
-| « C'est quoi, le jeu ? Le lien ? » | « *Dig For Real*, nom provisoire. Un prototype, pas encore téléchargeable. Je montre l'avancement ici. » |
-| « Il sort quand ? » | « Pas de date : je ne promets rien que je ne peux pas tenir. » |
+| « C'est quoi, le jeu ? Le lien ? Il sort quand ? » | « *Dig For Real*, nom provisoire. Un prototype, pas encore téléchargeable, et pas de date : je ne promets rien que je ne peux pas tenir. » |
 | « Il y aura des pubs ? » | « Aucune pub imposée, c'est le principe. Des pubs au choix, contre un bonus. » |
 
 ## 6. Règles d'honnêteté des vidéos

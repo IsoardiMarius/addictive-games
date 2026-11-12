@@ -323,6 +323,17 @@ namespace Game.Core
                     g.TextOutlined(fx.BannerSub, ViewW * 0.5f, cy + 34f, 20f * s, Col.Hex(0x7CFFB2, a), Col.Hex(0x0B0D22, a), 2f);
             }
 
+            // Effet du dernier portail franchi.
+            if (fx.NoticeT < 1.25f && fx.Notice.Length > 0)
+            {
+                float t = fx.NoticeT;
+                float s = Mathx.EaseOutBack(MathF.Min(1f, t * 5f));
+                float a = t > 0.95f ? 1f - (t - 0.95f) / 0.3f : 1f;
+                float size = 26f, tw = g.Measure(fx.Notice, size);
+                if (tw > ViewW - 40f) size *= (ViewW - 40f) / tw;
+                g.TextOutlined(fx.Notice, ViewW * 0.5f, viewH * 0.40f - t * 14f, size * s, Col.Hex(fx.NoticeRgb, a), Col.Hex(0x0B0D22, a), 2.4f);
+            }
+
             if (low && !run.Over)
                 g.TextOutlined(Loc.Get("hud.low"), ViewW * 0.5f, top + bh + 86f, 15f, Col.Hex(0xFF8A94, 0.6f + 0.4f * MathF.Sin(time * 12f)), Col.Hex(0x0B0D22), 1.6f);
 
